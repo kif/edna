@@ -329,6 +329,11 @@ def guinier_plot(curve_file, first_point=None, last_point=None, filename=None,
     q = data.get("q")
     I = data.get("I")
     err = data.get("err")
+    
+    mask = (I>0) + numpy.isfinite(I) + (q>0) + numpy.isfinite(q) 
+    if err is not None:
+        mask += (err>0.0) + numpy.isfinite(err)
+    mask = mask.astype(bool)
     if first_point is None:
         first_point = data.get("first_point", 0)
     if last_point is None:
@@ -369,10 +374,10 @@ def guinier_plot(curve_file, first_point=None, last_point=None, filename=None,
         ax = fig.add_subplot(1, 1, 1)
     if err is not None:
         dlogI = err[:end] / logI
-        ax.errorbar(q2, logI, dlogI, label="Experimental curve",
+        ax.errorbar(q2[mask], logI[mask], dlogI[mask], label="Experimental curve",
                     capsize=0, color="blue", ecolor="lightblue")
     else:
-        ax.plot(q2, logI, label="Experimental curve", color="blue")
+        ax.plot(q2[mask], logI[mask], label="Experimental curve", color="blue")
     # ax.plot(q2[first_point:last_point], logI[first_point:last_point], marker='D', markersize=5, label="Guinier region")
     xmin = q2[first_point]
     xmax = q2[last_point]
