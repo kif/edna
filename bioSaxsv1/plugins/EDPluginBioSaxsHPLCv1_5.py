@@ -21,7 +21,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 from __future__ import with_statement
-from lxml.etree import ErrorLevels
 
 __author__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
@@ -40,7 +39,7 @@ from EDFactoryPlugin import edFactoryPlugin
 edFactoryPlugin.loadModule("XSDataBioSaxsv1_0")
 edFactoryPlugin.loadModule("XSDataEdnaSaxs")
 from XSDataBioSaxsv1_0 import XSDataInputBioSaxsHPLCv1_0, XSDataResultBioSaxsHPLCv1_0, \
-                            XSDataInputBioSaxsProcessOneFilev1_0, XSDataRamboTainer
+                              XSDataInputBioSaxsProcessOneFilev1_0, XSDataRamboTainer
 from XSDataEdnaSaxs import XSDataInputDatcmp, XSDataInputAutoRg
 from XSDataCommon import XSDataFile, XSDataString, XSDataStatus, XSDataTime, \
     XSDataDouble
@@ -51,7 +50,7 @@ from freesas.cormap import gof
 from freesas.autorg import autoRg, InsufficientDataError
 
 
-class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
+class EDPluginBioSaxsHPLCv1_5(EDPluginControl):
     """
     plugin for processing Saxs data coming from HPLC
 
@@ -73,7 +72,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
     lock during buffer curve creation.
     """
 
-    strControlledPluginProcessOneFile = "EDPluginBioSaxsProcessOneFilev1_4"
+    strControlledPluginProcessOneFile = "EDPluginBioSaxsProcessOneFilev1_5"
     strControlledPluginDatop = "EDPluginExecDatopv2_0"
     strControlledPluginAutoRg = "EDPluginExecAutoRgv1_1"
     #strControlledPluginDatCmp = "EDPluginExecDatcmpv2_0"
@@ -114,7 +113,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
         """
         Checks the mandatory parameters.
         """
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.checkParameters")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.checkParameters")
         self.checkMandatoryParameters(self.dataInput, "Data Input is None")
         self.checkMandatoryParameters(self.dataInput.rawImage, "No raw image")
         self.checkMandatoryParameters(self.dataInput.sample, "no Sample parameter")
@@ -129,7 +128,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
         if self.__class__.SIMILARITY_THRESHOLD_SAMPLE is None:
             with self._sem:
                 if self.__class__.SIMILARITY_THRESHOLD_SAMPLE is None:
-                    self.DEBUG("EDPluginBioSaxsHPLCv1_4.configure")
+                    self.DEBUG("EDPluginBioSaxsHPLCv1_5.configure")
                     self.__class__.SIMILARITY_THRESHOLD_BUFFER = float(self.config.get(self.SIMILARITY_THRESHOLD_BUFFER_KEY, self.SIMILARITY_THRESHOLD_BUFFER_DEFAULT))
                     self.__class__.SIMILARITY_THRESHOLD_SAMPLE = float(self.config.get(self.SIMILARITY_THRESHOLD_SAMPLE_KEY, self.SIMILARITY_THRESHOLD_SAMPLE_DEFAULT))
 
@@ -142,7 +141,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
 
     def preProcess(self, _edObject=None):
         EDPluginControl.preProcess(self)
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.preProcess")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.preProcess")
         sdi = self.dataInput
         if sdi.runId is not None:
             self.runId = sdi.runId.value
@@ -206,7 +205,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
 
     def process(self, _edObject=None):
         EDPluginControl.process(self)
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.process")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.process")
 
         xsdIn = XSDataInputBioSaxsProcessOneFilev1_0(rawImage=self.dataInput.rawImage,
                                                      sample=self.dataInput.sample,
@@ -318,7 +317,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
         after process
         """
         EDPluginControl.postProcess(self)
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.postProcess")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.postProcess")
         if self.hplc_run.buffer:
             self.xsDataResult.bufferCurve = XSDataFile(XSDataString(self.hplc_run.buffer))
         if self.curve:
@@ -356,7 +355,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
         m = numpy.vstack((q, I, err))
 
         with open(filename, "w") as outfile:
-           # print "Saving buffer"
+            # print "Saving buffer"
             numpy.savetxt(outfile, m.T)
         with self._sem:
             self.hplc_run.buffer = filename
@@ -364,8 +363,8 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
             self.hplc_run.buffer_Stdev = err
 
     def doSuccessProcessOneFile(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.doSuccessProcessOneFile")
-        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_4.doSuccessProcessOneFile")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.doSuccessProcessOneFile")
+        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_5.doSuccessProcessOneFile")
         if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.status and _edPlugin.dataOutput.status.executiveSummary:
             self.lstExecutiveSummary.append(_edPlugin.dataOutput.status.executiveSummary.value)
         output = _edPlugin.dataOutput
@@ -420,8 +419,8 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
         self.xsDataResult.summedIntensity = XSDataDouble(value=self.frame.sum_I)
 
     def doFailureProcessOneFile(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.doFailureProcessOneFile")
-        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_4.doFailureProcessOneFile")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.doFailureProcessOneFile")
+        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_5.doFailureProcessOneFile")
         if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.status and _edPlugin.dataOutput.status.executiveSummary:
             self.lstExecutiveSummary.append(_edPlugin.dataOutput.status.executiveSummary.value)
         else:
@@ -429,8 +428,8 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
         self.setFailure()
 
     def doSuccessAutoRg(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.doSuccessAutoRg")
-        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_4.doSuccessAutoRg")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.doSuccessAutoRg")
+        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_5.doSuccessAutoRg")
         if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.status and _edPlugin.dataOutput.status.executiveSummary:
             self.lstExecutiveSummary.append(_edPlugin.dataOutput.status.executiveSummary.value)
         try:
@@ -478,8 +477,8 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
                 self.xsDataResult.rti = xsdRTI
 
     def doFailureAutoRg(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsHPLCv1_4.doFailureAutoRg")
-        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_4.doFailureAutoRg")
+        self.DEBUG("EDPluginBioSaxsHPLCv1_5.doFailureAutoRg")
+        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_5.doFailureAutoRg")
         strErr = "Edna plugin AutoRg failed."
         if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.status and _edPlugin.dataOutput.status.executiveSummary:
             self.lstExecutiveSummary.append(_edPlugin.dataOutput.status.executiveSummary.value)
@@ -491,7 +490,7 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
     #def doSuccessDatCmp(self, _edPlugin=None):
     def datcmp(self,intensity1,intensity2):
         self.DEBUG("DatCmp")
-        #self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_4.doSuccessDatCmp")
+        #self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_5.doSuccessDatCmp")
         #if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.status and _edPlugin.dataOutput.status.executiveSummary:
         #   self.lstExecutiveSummary.append(_edPlugin.dataOutput.status.executiveSummary.value)
         #if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.fidelity:
@@ -535,8 +534,8 @@ class EDPluginBioSaxsHPLCv1_4(EDPluginControl):
 
 
 #     def doFailureDatCmp(self, _edPlugin=None):
-#         self.DEBUG("EDPluginBioSaxsHPLCv1_4.doFailureDatCmp")
-#         self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_4.doFailureDatCmp")
+#         self.DEBUG("EDPluginBioSaxsHPLCv1_5.doFailureDatCmp")
+#         self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsHPLCv1_5.doFailureDatCmp")
 #         if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.status and _edPlugin.dataOutput.status.executiveSummary:
 #             self.lstExecutiveSummary.append(_edPlugin.dataOutput.status.executiveSummary.value)
 #         else:

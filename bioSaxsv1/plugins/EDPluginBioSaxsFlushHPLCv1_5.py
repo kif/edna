@@ -43,10 +43,10 @@ from XSDataBioSaxsv1_0 import XSDataInputBioSaxsHPLCv1_0, XSDataResultBioSaxsHPL
 from XSDataEdnaSaxs import XSDataInputDataver, XSDataInputSaxsAnalysis
 
 from XSDataCommon import XSDataString, XSDataStatus, XSDataFile
-from EDPluginBioSaxsHPLCv1_4 import EDPluginBioSaxsHPLCv1_4
+from EDPluginBioSaxsHPLCv1_5 import EDPluginBioSaxsHPLCv1_5
 
 
-class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
+class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
     """
     plugin that just flushes the HPLC data to disk
     
@@ -57,6 +57,8 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
     
     v1.2:
     * adapt for version HPLC plugin v1.2
+    
+    v1.5: Switch autoRG: atsas -> freesas
     """
     strControlledPluginDatAver = "EDPluginExecDataverv2_0"
     strControlledPluginISPyB = "EDPluginBioSaxsISPyB_HPLCv1_0"
@@ -84,13 +86,13 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
         """
         Checks the mandatory parameters.
         """
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.checkParameters")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.checkParameters")
         self.checkMandatoryParameters(self.dataInput, "Data Input is None")
         self.checkMandatoryParameters(self.dataInput.rawImage, "No raw image")
 
     def preProcess(self, _edObject=None):
         EDPluginControl.preProcess(self)
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.preProcess")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.preProcess")
         sdi = self.dataInput
         if sdi.runId is not None:
             self.runId = sdi.runId.value
@@ -103,9 +105,9 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
 
     def process(self, _edObject=None):
         EDPluginControl.process(self)
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.process")
-        if self.runId in EDPluginBioSaxsHPLCv1_4.dictHPLC:
-            self.processRun(EDPluginBioSaxsHPLCv1_4.dictHPLC[self.runId])
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.process")
+        if self.runId in EDPluginBioSaxsHPLCv1_5.dictHPLC:
+            self.processRun(EDPluginBioSaxsHPLCv1_5.dictHPLC[self.runId])
             try:
                 edpluginIsPyB = self.loadPlugin(self.strControlledPluginISPyB)
                 edpluginIsPyB.dataInput = XSDataInputBioSaxsISPyB_HPLCv1_0(sample=self.dataInput.sample,
@@ -116,13 +118,13 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
                 self.dataOutputBioSaxsISPyB_HPLC = edpluginIsPyB.xsdResult
             except Exception as error:
                 traceback.print_stack()
-                self.ERROR("EDPluginBioSaxsFlushHPLCv1_4 calling to EDPluginBioSaxsISPyB_HPLCv1_0: %s" % error)
+                self.ERROR("EDPluginBioSaxsFlushHPLCv1_5 calling to EDPluginBioSaxsISPyB_HPLCv1_0: %s" % error)
 
-            self.processMerges(EDPluginBioSaxsHPLCv1_4.dictHPLC[self.runId])
+            self.processMerges(EDPluginBioSaxsHPLCv1_5.dictHPLC[self.runId])
 
     def postProcess(self, _edObject=None):
         EDPluginControl.postProcess(self)
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.postProcess")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.postProcess")
         self.synchronizePlugins()
 
     def finallyProcess(self, _edObject=None):
@@ -133,7 +135,7 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
 
 
     def processRun(self, run):
-        #EDPluginBioSaxsHPLCv1_4.dictHPLC[self.runId].reset()
+        #EDPluginBioSaxsHPLCv1_5.dictHPLC[self.runId].reset()
         for idx in run.frames:
             run.frames[idx].purge_memory()
         run.dump_json()
@@ -158,10 +160,10 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
                 run.merge_framesDIC[outname] = [group[0], group[-1]]
         except ValueError:
             traceback.print_stack()
-            self.ERROR("EDPluginBioSaxsFlushHPLCv1_4: ValueError Error in analysing run")
+            self.ERROR("EDPluginBioSaxsFlushHPLCv1_5: ValueError Error in analysing run")
         except Exception as error:
             traceback.print_stack()
-            self.ERROR("EDPluginBioSaxsFlushHPLCv1_4:  Error in analysing run" % error)
+            self.ERROR("EDPluginBioSaxsFlushHPLCv1_5:  Error in analysing run" % error)
         # Append to hdf5
         run.append_hdf5()
 
@@ -212,7 +214,7 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
                     self.__edPluginISPyBAnalysis.executeSynchronous()
                 except Exception as error:
                     traceback.print_stack()
-                    self.ERROR("EDPluginBioSaxsFlushHPLCv1_4 calling to EDPluginHPLCPrimayDataISPyBv1_0: %s" % error)
+                    self.ERROR("EDPluginBioSaxsFlushHPLCv1_5 calling to EDPluginHPLCPrimayDataISPyBv1_0: %s" % error)
     
         self.synchronizePlugins()
         # There were some recurring issues with dammin slowing down slavia, therefore I commented this out for the time being
@@ -243,12 +245,12 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
                         self.__edPluginSaxsToSAS.execute()
                     except Exception as error:
                         traceback.print_stack()
-                        self.ERROR("EDPluginBioSaxsFlushHPLCv1_4 calling to EDPluginBioSaxsToSASv1_1: %s" % error)
+                        self.ERROR("EDPluginBioSaxsFlushHPLCv1_5 calling to EDPluginBioSaxsToSASv1_1: %s" % error)
         self.synchronizePlugins()
 
     def doSuccessDatAver(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doSuccessDatAver")
-        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_4.doSuccessDatAver")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doSuccessDatAver")
+        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doSuccessDatAver")
         if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.outputCurve:
             outCurve = _edPlugin.dataOutput.outputCurve.path.value
             if os.path.exists(outCurve):
@@ -260,8 +262,8 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
                 self.setFailure()
 
     def doFailureDatAver(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doFailureDatAver")
-        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_4.doFailureDatAver")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doFailureDatAver")
+        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doFailureDatAver")
         if _edPlugin and _edPlugin.dataOutput and _edPlugin.dataOutput.status and _edPlugin.dataOutput.status.executiveSummary:
             self.lstExecutiveSummary.append(_edPlugin.dataOutput.status.executiveSummary.value)
         else:
@@ -269,10 +271,10 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
         self.setFailure()
 
     def doSuccessSaxsAnalysis(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doSuccessSaxsAnalysis")
-        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_4.doSuccessSaxsAnalysis")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doSuccessSaxsAnalysis")
+        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doSuccessSaxsAnalysis")
         self.retrieveMessages(_edPlugin)
-        run = EDPluginBioSaxsHPLCv1_4.dictHPLC[self.runId]
+        run = EDPluginBioSaxsHPLCv1_5.dictHPLC[self.runId]
         curvename = _edPlugin.dataOutput.autoRg.filename.path.value
         run.merge_analysis[curvename] = _edPlugin.dataOutput
 #         run.merge_xsScatterPlot[curvename] = _edPlugin.dataOutput.scatterPlot
@@ -282,8 +284,8 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
         self.addExecutiveSummaryLine(_edPlugin.dataOutput.status.executiveSummary.value)
 
     def doFailureSaxsAnalysis(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doFailureSaxsAnalysis")
-        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_4.doFailureSaxsAnalysis")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doFailureSaxsAnalysis")
+        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doFailureSaxsAnalysis")
         self.retrieveMessages(_edPlugin)
         strErr = "Error in Processing of EDNA SaxsAnalysis = AutoRg => datGnom => datPorod"
         self.ERROR(strErr)
@@ -291,12 +293,12 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
         self.setFailure()
         
     def doSuccessSaxsToSAS(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doSuccessSaxsToSAS")
-        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_4.doSuccessSaxsToSAS")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doSuccessSaxsToSAS")
+        self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doSuccessSaxsToSAS")
         
     def doFailureSaxsToSAS(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doFailureSaxsToSAS")
-        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_4.doFailureSaxsToSAS")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doFailureSaxsToSAS")
+        self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doFailureSaxsToSAS")
         self.retrieveMessages(_edPlugin)
         strErr = "Error in Modeling of merged data"
         self.ERROR(strErr)
@@ -304,11 +306,11 @@ class EDPluginBioSaxsFlushHPLCv1_4 (EDPluginControl):
         self.setFailure()
         
     def doSuccessISPyBAnalysis(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doSuccessISPyBAnalysis")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doSuccessISPyBAnalysis")
         self.addExecutiveSummaryLine("Registered analysis in ISPyB")
         self.retrieveMessages(_edPlugin)
 
     def doFailureISPyBAnalysis(self, _edPlugin=None):
-        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_4.doFailureISPyBAnalysis")
+        self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doFailureISPyBAnalysis")
         self.addExecutiveSummaryLine("Failed to register analysis in ISPyB")
         self.retrieveMessages(_edPlugin)

@@ -116,7 +116,7 @@ complex type XSDataInputAutoRg extends XSDataInput{
 }
 
 complex type XSDataAutoRg extends XSData{
-	filename: XSDataFile
+	filename: XSDataFile optional
 	rg: XSDataLength
 	rgStdev: XSDataLength
 	i0: XSDataDouble
