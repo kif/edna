@@ -143,9 +143,13 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
         self.json = os.path.splitext(hdf5)[0] + ".json"
         self.xsDataResult.hplcFile = XSDataFile(XSDataString(hdf5))
         self.xsDataResult.hplcImage = XSDataFile(XSDataString(run.make_plot()))
+        peaks = []
         try:
             peaks = run.analyse()
-            for group in peaks:
+        except Exception as error:
+            traceback.print_stack()
+            self.ERROR("EDPluginBioSaxsFlushHPLCv1_5:  Error in run.analyse() %s" % error)
+        for group in peaks:
                 self.lstExecutiveSummary.append("Merging frames from %s to %s" % (group[0], group[-1]))
                 xsdFrames = [XSDataFile(XSDataString(run.frames[i].subtracted)) for i in group]
                 outname = os.path.splitext(run.frames[group[0]].subtracted)[0] + "_aver_%s.dat" % group[-1]
@@ -158,12 +162,6 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
                 run.merge_analysis[outname] = None
                 run.merge_Rg[outname] = None
                 run.merge_framesDIC[outname] = [group[0], group[-1]]
-        except ValueError:
-            traceback.print_stack()
-            self.ERROR("EDPluginBioSaxsFlushHPLCv1_5: ValueError Error in analysing run")
-        except Exception as error:
-            traceback.print_stack()
-            self.ERROR("EDPluginBioSaxsFlushHPLCv1_5:  Error in analysing run" % error)
         # Append to hdf5
         run.append_hdf5()
 
