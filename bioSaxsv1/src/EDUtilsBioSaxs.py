@@ -645,7 +645,14 @@ class HPLCrun(object):
         # parameters for peak finding algorithm
         window_min_size = 1
         window_max_size_rel = 0.2  # to be multiplied by size of ROI
-
+        
+        EDVerbose.error("Type self.I0: %s"% type(self.I0))
+        try:
+            EDVerbose.error("len self.I0: %s"% len(self.I0))
+        
+            EDVerbose.error("shape self.I0: "+ str(self.I0.shape))
+        except:
+            pass
         Ismooth = medfilt(self.I0, smoothing_degree)
         lab = label(Ismooth)
         Rgsmooth = medfilt(self.Rg, smoothing_degree)
