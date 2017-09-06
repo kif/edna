@@ -37,6 +37,15 @@ if sys.version > (3, 0):
 else:
     from Queue import Queue
 
+try:
+    from rfoo.utils import rconsole
+    rconsole.spawn_server()
+except ImportError:
+    print("No socket opened for debugging -> please install rfoo if you want to debug online")
+else:
+    print("rfoo installed, you can debug online with rconsole")
+
+
 import matplotlib
 matplotlib.use("Agg")
 
