@@ -300,15 +300,17 @@ class HPLCframe(object):
 def median_filt(input_array, width=3):
     """
     Simple 1D median filter (with reflect mode)
+    #Deprecated, works no more with debian8
     """
-    b = numpy.zeros(input_array.size + width, dtype=input_array.dtype)
-    b[:width // 2] = input_array[width // 2 - 1::-1]
-    b[-width + width // 2:] = input_array[-1:-width + width // 2 - 1:-1]
-    b[width // 2:-width + width // 2] = input_array
-    c = numpy.outer(b, numpy.ones(width, dtype=input_array.dtype))
-    c.strides = c.strides[0], c.strides[0]
-    d = numpy.median(c, axis= -1)
-    return d[:-width]
+    #b = numpy.zeros(input_array.size + width, dtype=input_array.dtype)
+    #b[:width // 2] = input_array[width // 2 - 1::-1]
+    #b[-width + width // 2:] = input_array[-1:-width + width // 2 - 1:-1]
+    #b[width // 2:-width + width // 2] = input_array
+    #c = numpy.outer(b, numpy.ones(width, dtype=input_array.dtype))
+    #c.strides = c.strides[0], c.strides[0]
+    #d = numpy.median(c, axis= -1)
+    #return d[:-width]
+    return medfilt(input_array, width)
 
 
 def label(a):
