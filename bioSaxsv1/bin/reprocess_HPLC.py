@@ -223,7 +223,7 @@ if __name__ == "__main__":
                       action="store_true", dest="verbose", default=False,
                       help="switch to debug mode")
     parser.add_option("-p", "--plugin", action="store", type="string",
-                      dest="plugin", default="EDPluginBioSaxsHPLCv1_4",
+                      dest="plugin", default="EDPluginBioSaxsHPLCv1_5",
                       help="use an alternative plugin")
     parser.add_option("-y", "--yappi", action="store_true",
                       dest="yappi", default=False,
