@@ -302,7 +302,7 @@ if __name__ == "__main__":
     edJob.setDataInput(open(fullargs[-1], "r").read())
     edJob.execute()
     edJob.synchronizeAll()
-    if parser.profile:
+    if options.profile:
         for i in EDObject.analyze_profiling:
             print(i)
 
