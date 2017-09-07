@@ -159,7 +159,7 @@ class EDObject(object):
     def analyze_profiling(cls):
         "Analyse the profiling an return a list of strings to be printed out"
         res = ["Analysis on: %s" % time.asctime(),
-               " Calls | Mean (s) | Std dev  | Total (s) | Plugin name",
+               "  Calls | Mean (s) | Std dev  | Total (s) | Plugin name",
                "-" * 80]
         subres = {}
         import numpy
