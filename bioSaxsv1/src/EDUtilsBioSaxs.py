@@ -647,13 +647,6 @@ class HPLCrun(object):
         window_min_size = 1
         window_max_size_rel = 0.2  # to be multiplied by size of ROI
 
-        EDVerbose.error("Type self.I0: %s" % type(self.I0))
-        try:
-            EDVerbose.error("len self.I0: %s" % len(self.I0))
-
-            EDVerbose.error("shape self.I0: " + str(self.I0.shape))
-        except:
-            pass
         Ismooth = medfilt(self.I0, smoothing_degree)
         lab = label(Ismooth)
         Rgsmooth = medfilt(self.Rg, smoothing_degree)
@@ -673,7 +666,7 @@ class HPLCrun(object):
 
                 Rgmed = Rgsmooth[start:stop]
                 Rg_Stdshort = self.Rg_Stdev[start:stop]
-                Rgshort = self.Rg[start:stop]
+#                 Rgshort = self.Rg[start:stop]
                 # This is an attempt to remove "dirt" - long broad peaks with no real peeak structure, noise on short timescales
                 # Test this with Ishort vs I0med
                 if datasmoothness(Ishort, I0med) < 0.25:
