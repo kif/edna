@@ -303,7 +303,7 @@ if __name__ == "__main__":
     edJob.execute()
     edJob.synchronizeAll()
     if options.profile:
-        for i in EDObject.analyze_profiling:
+        for i in EDObject.analyze_profiling():
             print(i)
 
 
