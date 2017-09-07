@@ -166,10 +166,10 @@ class EDObject(object):
         for name, lst_timimgs in cls.profiling.items():
             npd = numpy.array(lst_timimgs)
             tot = npd.sum()
-            line = " %6d | %8.3f | %8.3 | %9.3 | %s " % 
-                    (npd.size, tot/npd.size, npt.std(), tot , name)
+            line = " %6d | %8.3f | %8.3 | %9.3 | %s " % \
+                    (npd.size, tot / npd.size, npd.std(), tot , name)
             subres[tot] = line
-        timimgs = list(subres.keys()) 
+        timimgs = list(subres.keys())
         timimgs.sort()
         for key in timimgs:
             res.append(subres[key])
