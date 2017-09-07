@@ -52,6 +52,7 @@ class EDObject(object):
     """
     __semaphoreId = Semaphore()
     __iId_class = 0
+    profiling = {}
 
     def __init__(self):
         """
@@ -64,6 +65,8 @@ class EDObject(object):
         with self.__class__.__semaphoreId:
             self.__class__.__iId_class += 1
             self.__iId = self.__class__.__iId_class
+            if self.__class__.__name__ not in self.__class__.profiling:
+                self.__class__.profiling[self.__class__.__name__] = []
         self.__semaphore = Semaphore()
         self.__fTimeInit = None
         self.__fTimeEnd = None
@@ -83,7 +86,7 @@ class EDObject(object):
     def synchronizeOn(self):
         """
         This method must be used in together with the method synchronizeOff().
-        This method makes the code threadsafe till the method synchronizeOff
+        This method makes the code thread-safe till the method synchronizeOff
         is called.
         """
         self.__semaphore.acquire()
@@ -128,6 +131,8 @@ class EDObject(object):
         """
         if self.__fTimeEnd is None:
             self.__fTimeEnd = time.time()
+            if self.__fTimeInit:
+                self.__class__.profiling[self.getClassName()].append(self.__fTimeEnd - self.__fTimeInit)
 
     def getTimeEnd(self):
         """
@@ -149,3 +154,23 @@ class EDObject(object):
             else:
                 fRetrunRunTime = self.__fTimeEnd - self.__fTimeInit
         return fRetrunRunTime
+
+    @classmethod
+    def analyze_profiling(cls):
+        "Analyse the profiling an return a list of strings to be printed out"
+        res = ["Analysis on: %s" % time.asctime(),
+               " Calls | Mean (s) | Std dev  | Total (s) | Plugin name",
+               "-" * 80]
+        subres = {}
+        import numpy
+        for name, lst_timimgs in cls.profiling.items():
+            npd = numpy.array(lst_timimgs)
+            tot = npd.sum()
+            line = " %6d | %8.3f | %8.3 | %9.3 | %s " % 
+                    (npd.size, tot/npd.size, npt.std(), tot , name)
+            subres[tot] = line
+        timimgs = list(subres.keys()) 
+        timimgs.sort()
+        for key in timimgs:
+            res.append(subres[key])
+        return res

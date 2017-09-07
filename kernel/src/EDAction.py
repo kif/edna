@@ -82,7 +82,7 @@ class EDAction(EDLogging, Thread):
         self.__bIsAbort = False
         # Reference to the object which calls execute or executeSynchronous
         self.__edObject = None
-        self.__lExtraTime = [] # list of extra allowed time for execution (in second)
+        self.__lExtraTime = []  # list of extra allowed time for execution (in second)
         self.__bLogTiming = False
 
     def executeKernel(self):
@@ -134,7 +134,7 @@ class EDAction(EDLogging, Thread):
         self.DEBUG("EDAction.executeKernel finallyProcess" + self.getClassName())
         try:
             self.finallyProcess()
-            if  self.__bLogTiming:
+            if self.__bLogTiming:
                 dictTimeStamps["finallyProcess"] = time.time()
         except Exception:
             self.DEBUG("EDAction.executeKernel: ERROR in finallyProcess!")
@@ -152,7 +152,7 @@ class EDAction(EDLogging, Thread):
             # Check that something doesn't go wrong in the success method!
             try:
                 self.__edSlotSUCCESS.call(self)
-                if  self.__bLogTiming:
+                if self.__bLogTiming:
                     dictTimeStamps["slotSUCCESS"] = time.time()
 
             except Exception:
@@ -165,7 +165,7 @@ class EDAction(EDLogging, Thread):
             # Check that something doesn't go wrong in the success method!
             try:
                 self.__edSlotFAILURE.call(self)
-                if  self.__bLogTiming:
+                if self.__bLogTiming:
                     dictTimeStamps["slotFAILURE"] = time.time()
             except Exception:
                 self.DEBUG("EDAction.executeKernel: ERROR in slotFAILURE!")
@@ -178,7 +178,7 @@ class EDAction(EDLogging, Thread):
             dictTimeStamps["end"] = time.time()
             lstTimings.append("EDAction.executeKernel: profiling of %s %i \t total time duration = %.3f s" % (self.getClassName(), self.getId(), dictTimeStamps["end"] - dictTimeStamps["init"]))
             fTimeForFailureCalculation = dictTimeStamps["init"]
-            if "preProcess" in  dictTimeStamps:
+            if "preProcess" in dictTimeStamps:
                 lstTimings.append("\t preProcess \t\t time duration = %.3f s" % (dictTimeStamps["preProcess"] - dictTimeStamps["init"]))
                 fTimeForFailureCalculation = dictTimeStamps["preProcess"]
 
@@ -214,10 +214,10 @@ class EDAction(EDLogging, Thread):
         if self.__fTimeOutInSeconds is None:
             self.__fTimeOutInSeconds = self.__fDefaultTimeOutInSeconds
 
-        #Wait for the thread to be started up to timeout
-        if self.isStarted() == False:
+        # Wait for the thread to be started up to timeout
+        if self.isStarted() is False:
             tStartWait = time.time()
-            while self.isStarted() == False:
+            while self.isStarted() is False:
                 time.sleep(1)
                 if time.time() - tStartWait > self.__fTimeOutInSeconds:
                     self.__bIsTimeOut = True
@@ -271,37 +271,37 @@ class EDAction(EDLogging, Thread):
 
     def connectPreProcess(self, _oMethod):
         self.synchronizeOn()
-        if (_oMethod != None):
+        if (_oMethod is not None):
             self.__edSlotPreProcess.connect(_oMethod)
         self.synchronizeOff()
 
     def connectProcess(self, _oMethod):
         self.synchronizeOn()
-        if (_oMethod != None):
+        if (_oMethod is not None):
             self.__edSlotProcess.connect(_oMethod)
         self.synchronizeOff()
 
     def connectPostProcess(self, _oMethod):
         self.synchronizeOn()
-        if (_oMethod != None):
+        if (_oMethod is not None):
             self.__edSlotPostProcess.connect(_oMethod)
         self.synchronizeOff()
 
     def connectSUCCESS(self, _oMethod):
         self.synchronizeOn()
-        if (_oMethod != None):
+        if (_oMethod is not None):
             self.__edSlotSUCCESS.connect(_oMethod)
         self.synchronizeOff()
 
     def connectFAILURE(self, _oMethod):
         self.synchronizeOn()
-        if (_oMethod != None):
+        if (_oMethod is not None):
             self.__edSlotFAILURE.connect(_oMethod)
         self.synchronizeOff()
 
     def connectFinallyProcess(self, _oMethod):
         self.synchronizeOn()
-        if (_oMethod != None):
+        if (_oMethod is not None):
             self.__edSlotFinallyProcess.connect(_oMethod)
         self.synchronizeOff()
 

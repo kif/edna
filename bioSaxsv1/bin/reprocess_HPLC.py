@@ -66,6 +66,7 @@ from EDJob import EDJob
 from EDThreading import Semaphore
 from EDUtilsParallel import EDUtilsParallel
 from EDStatus import EDStatus
+from EDObject import EDObject
 
 class Reprocess(EDLogging):
     def __init__(self, strPluginName, iNbCpu=None):
@@ -237,6 +238,10 @@ if __name__ == "__main__":
     parser.add_option("-y", "--yappi", action="store_true",
                       dest="yappi", default=False,
                       help="use an multi-threaded profiler named 'YAPPI'")
+    parser.add_option("--profile", action="store_true",
+                      dest="profile", default=False,
+                      help="Show profiling information per plugin")
+
     (options, args) = parser.parse_args()
     print("")
     print("Options:")
@@ -268,7 +273,7 @@ if __name__ == "__main__":
     print psutil.phymem_usage()
     counter = 0
     for i in fullargs:
-        if counter%500 == 0:
+        if counter % 500 == 0:
             print psutil.phymem_usage()
         reprocess.startJob(i)
         counter += 1
@@ -296,4 +301,9 @@ if __name__ == "__main__":
     edJob = EDJob(options.plugin.replace("EDPluginBioSaxsHPLC", "EDPluginBioSaxsFlushHPLC"))
     edJob.setDataInput(open(fullargs[-1], "r").read())
     edJob.execute()
+    edJob.synchronizeAll()
+    if parser.profile:
+        for i in EDObject.analyze_profiling:
+            print(i)
+
 

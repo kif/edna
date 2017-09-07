@@ -1,5 +1,5 @@
 #
-#coding: utf8
+# coding: utf8
 #
 #    Project: BioSaxs : ID14-3
 #             http://www.edna-site.org
@@ -24,11 +24,12 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from __future__ import with_statement
-from Cython.Plex.Regexps import Opt
 """
 Utilities for BioSaxs, especially for logging back both to EDNA using EDVerbose and to BioSaxsCube through SpecVariable
 """
+
+
+from __future__ import with_statement
 
 __author__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
@@ -63,14 +64,13 @@ from matplotlib import pylab
 import scipy.integrate as scint
 from signalProcessing import find_peaks_cwt
 from scipy.signal import medfilt, butter, filtfilt
-from scipy.optimize import curve_fit
 from math import floor as mfloor
-import numpy as np
 
 
 class Error(Exception):
     """Base class for exceptions in this module."""
     pass
+
 
 class EDUtilsBioSaxs(EDObject):
 
@@ -162,7 +162,7 @@ class EDUtilsBioSaxs(EDObject):
 #            EDVerbose.DEBUG(_strMessage)
 
         if EDUtilsBioSaxs.specStatus is not None:
-            currentStatus = EDUtilsBioSaxs.specStatus.value["reprocess"]["status"]     # must do this, since SpecClient is apparently returning a non-expected data structure
+            currentStatus = EDUtilsBioSaxs.specStatus.value["reprocess"]["status"]  # must do this, since SpecClient is apparently returning a non-expected data structure
             i = currentStatus.rfind(",")
             # TB: This ,1 or ,0 suffix nonsense seems to be a hack to force Spec to signal a variable change to bsxcube
             if i == -1 or currentStatus[i + 1:] == "1":
@@ -215,13 +215,12 @@ class EDUtilsBioSaxs(EDObject):
                 else:
                     extra += "_" + oneItem
 
-        try: #remove the "." at the begining of the extension
+        try:  # remove the "." at the begining of the extension
             extension = extension[1:]
         except IndexError:
             extension = ""
 
-
-        try: #remove the "_" at the begining of the extra
+        try:  # remove the "_" at the begining of the extra
             extra = extra[1:]
         except IndexError:
             extra = ""
@@ -302,14 +301,14 @@ def median_filt(input_array, width=3):
     Simple 1D median filter (with reflect mode)
     #Deprecated, works no more with debian8
     """
-    #b = numpy.zeros(input_array.size + width, dtype=input_array.dtype)
-    #b[:width // 2] = input_array[width // 2 - 1::-1]
-    #b[-width + width // 2:] = input_array[-1:-width + width // 2 - 1:-1]
-    #b[width // 2:-width + width // 2] = input_array
-    #c = numpy.outer(b, numpy.ones(width, dtype=input_array.dtype))
-    #c.strides = c.strides[0], c.strides[0]
-    #d = numpy.median(c, axis= -1)
-    #return d[:-width]
+    # b = numpy.zeros(input_array.size + width, dtype=input_array.dtype)
+    # b[:width // 2] = input_array[width // 2 - 1::-1]
+    # b[-width + width // 2:] = input_array[-1:-width + width // 2 - 1:-1]
+    # b[width // 2:-width + width // 2] = input_array
+    # c = numpy.outer(b, numpy.ones(width, dtype=input_array.dtype))
+    # c.strides = c.strides[0], c.strides[0]
+    # d = numpy.median(c, axis= -1)
+    # return d[:-width]
     return medfilt(input_array, width)
 
 
@@ -328,18 +327,18 @@ def label(a):
             last = cnt
     return out
 
+
 def datasmoothness(raw, filtered):
     return ((raw - filtered) * (raw - filtered)).mean() * 1.0 / raw.mean() ** 2
 
 
-
 class HPLCrun(object):
-    def __init__(self, runId, first_curve=None, firstCurveIntensity = None):
+    def __init__(self, runId, first_curve=None, firstCurveIntensity=None):
         self.id = runId
         self.deleted = False
         self.buffer = None  # filename of the buffer
         self.first_curve = first_curve
-        self.frames = {} #key: id, value: HPLCframe instance
+        self.frames = {}  # key: id, value: HPLCframe instance
         self.curves = []
         self.for_buffer = []
         self.for_buffer_sum_I = None
@@ -352,7 +351,7 @@ class HPLCrun(object):
             self.files.append(first_curve)
         if firstCurveIntensity:
             self.firstCurveIntensity = firstCurveIntensity
-        else: 
+        else:
             self.firstCurveIntensity = None
         self.max_size = None
         self.start_time = None
@@ -378,19 +377,19 @@ class HPLCrun(object):
         self.mass = None
         self.Vc_Stdev = None
         self.Qr_Stdev = None
-        self.mass_Stdev = None  
+        self.mass_Stdev = None
         self.buffer_frames = None
         self.merge_frames = None  # indexes of first and last frame marged
         self.buffer_I = None
         self.buffer_Stdev = None
-        self.merge_I = None 
-        self.merge_Stdev = None     
+        self.merge_I = None
+        self.merge_Stdev = None
         self.merge_curves = []
         self.merge_Rg = {}
         self.merge_analysis = {}
         self.merge_framesDIC = {}
-        self.keys1d = ["gnom","Dmax","total","volume","Rg","Rg_Stdev","I0","I0_Stdev","quality","sum_I","Vc", "Qr","mass","Vc_Stdev","Qr_Stdev","mass_Stdev"]
-        self.keys2d = ["scattering_I","scattering_Stdev","subtracted_I","subtracted_Stdev"]
+        self.keys1d = ["gnom", "Dmax", "total", "volume", "Rg", "Rg_Stdev", "I0", "I0_Stdev", "quality", "sum_I", "Vc", "Qr", "mass", "Vc_Stdev", "Qr_Stdev", "mass_Stdev"]
+        self.keys2d = ["scattering_I", "scattering_Stdev", "subtracted_I", "subtracted_Stdev"]
         self.keys_frames = ["buffer_frames", "merge_frames"]
         self.keys_merges = ["buffer_I", "buffer_Stdev", "merge_I", "merge_Stdev"]
         # self.keys_analysis = ["merge_Guinier", "merge_Gnom", "merge_Porod"]
@@ -481,12 +480,12 @@ class HPLCrun(object):
     def extract_data(self, force_finished=False):
         self.max_size = self.calc_size(max(self.frames.keys()) + 1)
         self.time = numpy.zeros(self.max_size, dtype=numpy.float64)
-       
-        if (self.q is None) or (self.size is None): 
+
+        if (self.q is None) or (self.size is None):
             if self.first_curve and os.path.exists(self.first_curve):
                 data = numpy.loadtxt(self.first_curve)
                 self.q = data[:, 0]
-                self.size = self.q.size 
+                self.size = self.q.size
         for key in self.keys2d:
             self.__setattr__(key, numpy.zeros((self.max_size, self.size), dtype=numpy.float32))
 
@@ -499,7 +498,7 @@ class HPLCrun(object):
                     time.sleep(1.0)
             for key in ["time"] + self.keys1d:
                 self.__getattribute__(key)[i] = frame.__getattribute__(key) or 0.0
-            
+
             if frame.curve and os.path.exists(frame.curve):
                 data = numpy.loadtxt(frame.curve)
                 self.scattering_I[i, :] = data[:, 1]
@@ -647,12 +646,12 @@ class HPLCrun(object):
         # parameters for peak finding algorithm
         window_min_size = 1
         window_max_size_rel = 0.2  # to be multiplied by size of ROI
-        
-        EDVerbose.error("Type self.I0: %s"% type(self.I0))
+
+        EDVerbose.error("Type self.I0: %s" % type(self.I0))
         try:
-            EDVerbose.error("len self.I0: %s"% len(self.I0))
-        
-            EDVerbose.error("shape self.I0: "+ str(self.I0.shape))
+            EDVerbose.error("len self.I0: %s" % len(self.I0))
+
+            EDVerbose.error("shape self.I0: " + str(self.I0.shape))
         except:
             pass
         Ismooth = medfilt(self.I0, smoothing_degree)
@@ -678,26 +677,19 @@ class HPLCrun(object):
                 # This is an attempt to remove "dirt" - long broad peaks with no real peeak structure, noise on short timescales
                 # Test this with Ishort vs I0med
                 if datasmoothness(Ishort, I0med) < 0.25:
-    #
 
                     # we smooth the data with a butterworth filter to remove high-frequency noise
 
-
                     b, a = butter(first_butter_par, second_butter_par)
-                    #We should take care of the pading length to avoid errors
-                    if 3*max(len(a),len(b)) > len(Ishort):
+                    # We should take care of the pading length to avoid errors
+                    if 3 * max(len(a), len(b)) > len(Ishort):
                         fl = filtfilt(b, a, Ishort)
                     else:
-                        fl = filtfilt(b, a, Ishort,padlen = Ishort.shape[0]-2)
-
-
+                        fl = filtfilt(b, a, Ishort, padlen=Ishort.shape[0] - 2)
 
                     # The parameters for the peak finding
                     window_max_size = mfloor(window_max_size_rel * len(numpy.where(fl)[0]))
                     peaks = find_peaks_cwt(fl, numpy.arange(window_min_size, window_max_size))
-
-
-
 
                     for i in range(len(peaks)):
                         peak = peaks[i]
@@ -712,21 +704,17 @@ class HPLCrun(object):
                         else:
                             maxindex = stop - start - 1
 
-
-                        if peak < maxindex and len(I0med[peak:maxindex])>1:                               
+                        if peak < maxindex and len(I0med[peak:maxindex]) > 1:
                             maxindex = I0med[peak:maxindex].argmin() + peak
-                        if minindex < peak  and len(I0med[minindex:peak + 1])>1 :
+                        if (minindex < peak) and (len(I0med[minindex:peak + 1]) > 1):
                             minindex = I0med[minindex:peak + 1].argmin() + minindex
                         maxi = I0med[minindex:maxindex].argmax() + minindex
 
-
                         if datasmoothness(Ishort[minindex:maxindex], I0med[minindex:maxindex]) < 0.3:
-                            if  I0med[peak] >= I0med[maxindex] and I0med[peak] >= I0med[minindex] and maxindex - minindex > 10:
-
-
+                            if I0med[peak] >= I0med[maxindex] and I0med[peak] >= I0med[minindex] and maxindex - minindex > 10:
 
                                 rg0 = Rgmed[maxi]
-                                srg0 = max(Rg_Stdshort[maxi],0.1) #The error estimate for a single frame can be unreallistically small
+                                srg0 = max(Rg_Stdshort[maxi], 0.1)  # The error estimate for a single frame can be unreallistically small
 
                                 good = ((abs(Rgmed - rg0) < srg0))
                                 good[maxindex] = False
@@ -752,12 +740,10 @@ class HPLCrun(object):
                                     self.merge_frames.append([region[0], region[-1]])
         return res
 
-
-
     def extract_merges(self):
-        #if self.buffer_I = None:
+        # if self.buffer_I = None:
         #    self.buffer_I = numpy.zeros(self.size, dtype=numpy.float32)
-        #if self.buffer_Stdev = None:    
+        # if self.buffer_Stdev = None:
         #    self.buffer_Stdev = numpy.zeros(self.size, dtype=numpy.float32)
         if self.merge_frames:
             self.merge_I = numpy.zeros((len(self.merge_frames), self.size), dtype=numpy.float32)
@@ -768,14 +754,14 @@ class HPLCrun(object):
 
         self.buffer_frames = [0, len(self.for_buffer)]
 
-        if self.buffer and os.path.exists(self.buffer) and  (self.buffer_I is None):
+        if self.buffer and os.path.exists(self.buffer) and (self.buffer_I is None):
             self.buffer_I = numpy.zeros(self.size, dtype=numpy.float32)
             self.buffer_Stdev = numpy.zeros(self.size, dtype=numpy.float32)
             data = numpy.loadtxt(self.buffer)
             self.buffer_I = data[:, 1]
             self.buffer_Stdev = data[:, 2]
 
-        if (not self.merge_frames == None) and len(self.merge_frames) > 0:
+        if (self.merge_frames is not None) and len(self.merge_frames) > 0:
             for i in range(len(self.merge_frames)):
                 group = self.merge_frames[i]
                 assert len(group) == 2
@@ -790,7 +776,6 @@ class HPLCrun(object):
         else:
             self.merge_frames = [0, 0]
 
-
     def append_hdf5(self):
         self.extract_merges()
         with self.lock:
@@ -799,12 +784,12 @@ class HPLCrun(object):
 #                     os.unlink(self.hdf5_filename)
                 self.hdf5 = h5py.File(self.hdf5_filename)
                 for key in self.keys_frames + self.keys_merges:
-                    if not self.__getattribute__(key) == None:
+                    if self.__getattribute__(key) is not None:
                         self.hdf5[key] = numpy.asarray(self.__getattribute__(key), dtype=numpy.float32)
                 self.hdf5.close()
             except:
                 print traceback.format_exc()
-                
+
         return self.hdf5_filename
 
 
@@ -856,7 +841,3 @@ def RamboTainerInvariant(dat, Rg, dRg, I0, dI0, imin, qmax=2):
     dmass = mass * dqr / qr
 
     return {'Vc': vc[0], 'dVc': vc[1], 'Qr': qr, 'dQr': dqr, 'mass': mass, 'dmass': dmass}
-
-
-
-

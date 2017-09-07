@@ -16,7 +16,7 @@ class CB(object):
         else:
             print("Please investigate !!!")
             print event
-dev=PyTango.DeviceProxy("dau/edna/1")
+dev=PyTango.DeviceProxy("dau/edna/3")
 print("Tango event watcher for EDNA")
 print("Press ctrl-C to quit")
 cb=CB()
