@@ -173,7 +173,7 @@ class EDPluginAutoSubv1_1(EDPluginControl):
                     #data = numpy.loadtxt(self.sampleCurve.path.value)
                     for buff in self.buffers: 
                         tempName = os.path.splitext(buff)[0] + '.sub'
-                        self.doSubtract(self.data,buff,tempName)
+                        self.doSubtract(self.data,self.bufferData[buff],tempName)
 #                         Isub = data [:,1] - self.bufferData[buff][:,1]
 #                         StdErr = numpy.sqrt(data[:,2] * data[:,2] + \
 #                         self.bufferData[buff][:,2] * self.bufferData[buff][:,2])
@@ -196,7 +196,8 @@ class EDPluginAutoSubv1_1(EDPluginControl):
                     edpluginRg.connectSUCCESS(self.doSuccessExecAutoRg)
                     edpluginRg.connectFAILURE(self.doFailureExecAutoRg)
                     edpluginRg.executeSynchronous()
-                    self.actualBestBuffer = self.dictRg.keys()[self.dictRg.values().index(min(self.dictRg.values()))]
+                    actualBestTmp = self.dictRg.keys()[self.dictRg.values().index(min(self.dictRg.values()))]
+                    self.actualBestBuffer = os.path.splitext(actualBestTmp)[0] + '.dat'
                     self.bestBufferType = str(self.actualBestBuffer)
                     self.bufferIntensity = self.bufferData[self.actualBestBuffer]
                 else:

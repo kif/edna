@@ -374,31 +374,34 @@ class EDPluginBioSaxsSmartMergev1_7(EDPluginControl):
             subtractedCurve = None	
             if self.xsdSubtractedCurve is not None:
                 subtractedCurve = self.xsdSubtractedCurve
-                xsdin = XSDataInputBioSaxsISPyBv1_0(sample=self.dataInput.sample,
-                                                         autoRg=self.autoRg,
-                                                         gnom=self.gnom,
-                                                         volume=self.volume,
-                                                         frameAverage=frameAverage,
-                                                         frameMerged=frameMerged,
-                                                         curves=self.curves,
-            					                         discardedFrames=self.discardedCurves,
-            					                         averagedFrames=self.mergedCurves,
-                 					                     averageFilePath=averageFilePath,
-            					                         bufferFrames = self.bufferFrames,
-            					                         sampleFrames = self.sampleFrames,
-                                                         bestBuffer=self.xsBestBuffer,
-            					                         averageSample=lastSample,
-                                                         scatterPlot=self.xsScatterPlot,
-                                                         guinierPlot=self.xsGuinierPlot,
-                                                         kratkyPlot=self.xsKratkyPlot ,
-                                                         densityPlot=self.xsDensityPlot,
-    						                             subtractedFilePath=subtractedCurve
-    #                                                     destination=self.dataInput.sample.ispybDestination #duplicate, already in sample
-                                                   )
-                self.__edPluginSaxsISPyB.dataInput = xsdin
-                self.__edPluginSaxsISPyB.connectSUCCESS(self.doSuccessISPyB)
-                self.__edPluginSaxsISPyB.connectFAILURE(self.doFailureISPyB)
-                self.__edPluginSaxsISPyB.execute()
+            else:
+                subtractedCurve = None
+
+	    xsdin = XSDataInputBioSaxsISPyBv1_0(sample=self.dataInput.sample,
+				                         autoRg=self.autoRg,
+				                         gnom=self.gnom,
+				                         volume=self.volume,
+				                         frameAverage=frameAverage,
+				                         frameMerged=frameMerged,
+				                         curves=self.curves,
+								         discardedFrames=self.discardedCurves,
+								         averagedFrames=self.mergedCurves,
+		 					                     averageFilePath=averageFilePath,
+								         bufferFrames = self.bufferFrames,
+								         sampleFrames = self.sampleFrames,
+				                         bestBuffer=self.xsBestBuffer,
+								         averageSample=lastSample,
+				                         scatterPlot=self.xsScatterPlot,
+				                         guinierPlot=self.xsGuinierPlot,
+				                         kratkyPlot=self.xsKratkyPlot ,
+				                         densityPlot=self.xsDensityPlot,
+									     subtractedFilePath=subtractedCurve
+		#                                                     destination=self.dataInput.sample.ispybDestination #duplicate, already in sample
+				                   )
+	    self.__edPluginSaxsISPyB.dataInput = xsdin
+	    self.__edPluginSaxsISPyB.connectSUCCESS(self.doSuccessISPyB)
+	    self.__edPluginSaxsISPyB.connectFAILURE(self.doFailureISPyB)
+            self.__edPluginSaxsISPyB.execute()
             
         
        # transfer analysis data to correct location on nice
