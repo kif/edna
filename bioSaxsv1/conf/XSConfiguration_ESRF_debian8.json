@@ -36,7 +36,7 @@
     "EDPluginBioSaxsProcessOneFilev1_6":{
         "DummyPixelValue": -2.0,
         "DummyPixelDelta": 1.5,
-        "DeviceType": "fullsplit_csr_ocl_gpu",
+        "DeviceType": "nosplit_csr_ocl_gpu",
         "NumberOfBins": 1043 
     },
     "EDPluginBioSaxsHPLCv1_2":{
