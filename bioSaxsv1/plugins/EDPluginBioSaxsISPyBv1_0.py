@@ -93,6 +93,7 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
         self.lstDiscarded = []
         self.lstAveraged = []
         self.averageFilePath = None
+	self.visitorFilePath = None
 
         # For subtraction
         self.bufferFrames = []
@@ -151,7 +152,9 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
             self.bestBuffer = self.dataInput.bestBuffer.path.value
 
 	if self.dataInput.averageFilePath is not None:
+	    #Attention: averageFilePath is changed when copying data! visitorFilePath should stay constant
 	    self.averageFilePath = self.dataInput.averageFilePath.path.value
+            self.visitorFilePath = self.dataInput.averageFilePath.path.value
 
 	if self.dataInput.sampleFrames is not None:
 	    self.sampleFrames = self.dataInput.sampleFrames
@@ -244,7 +247,8 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
 	    			    collectionOrder,
                                     str(frames),
                                     str(discarded),
-                                    str(self.averageFilePath))
+                                    str(self.averageFilePath),
+				    str(self.visitorFilePath))
         except Exception, error:
             strError = "ISPyB error: %s" % error
             self.ERROR(strError)
