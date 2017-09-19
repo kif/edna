@@ -31,7 +31,7 @@ __license__ = "GPLv3+"
 __copyright__ = "European Synchrotron Radiation Facility, Grenoble, France"
 __date__ = "20131118"
 
-import os, sys, time, threading, gc, psutil
+import os, sys, time, threading, gc#, psutil
 if sys.version > (3, 0):
     from queue import Queue
 else:
@@ -269,12 +269,13 @@ if __name__ == "__main__":
     working_dir = "Reprocess-HPLC-%s" % time.strftime("%Y%m%d-%H%M%S")
     os.makedirs(working_dir)
     os.chdir(working_dir)
-    if yappi: yappi.start()
-    print psutil.phymem_usage()
+    if yappi: 
+        yappi.start()
+    #print psutil.phymem_usage()
     counter = 0
     for i in fullargs:
-        if counter % 500 == 0:
-            print psutil.phymem_usage()
+        #if counter % 500 == 0:
+        #    print psutil.phymem_usage()
         reprocess.startJob(i)
         counter += 1
     print("All %i jobs queued after %.3fs" % (len(args), time.time() - reprocess.startTime))

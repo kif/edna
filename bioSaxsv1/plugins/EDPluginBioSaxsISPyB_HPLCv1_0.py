@@ -62,6 +62,7 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
         self.hdf5File = None
         self.jsonFile = None
         self.hplcPlot = None
+        self.visitorFilePath = None
 
         self.xsdResult = XSDataResultBioSaxsISPyB_HPLCv1_0()
 
@@ -122,16 +123,17 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
         
         if (self.dataInput.hdf5File is not None):
             if (self.dataInput.hdf5File.path is not None):
+                #Attenttion: self.hdf5File will be changed later on
                 self.hdf5File = self.dataInput.hdf5File.path.value
-                
+                self.visitorFilePath = self.dataInput.hdf5File.path.value
+               
         if (self.dataInput.jsonFile is not None):
             if (self.dataInput.jsonFile.path is not None):        
                 self.jsonFile = self.dataInput.jsonFile.path.value
                 
         if (self.dataInput.hplcPlot is not None):
             if (self.dataInput.hplcPlot.path is not None):   
-                self.hplcPlot = self.dataInput.hplcPlot.path.value
-
+                self.hplcPlot = self.dataInput.hplcPlot.path.value    
 
     def process(self, _edObject=None):
         EDPluginControl.process(self)
@@ -165,7 +167,7 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
                         self.client.service.storeHPLC(
                                             experimentId,
                                             self.hdf5File,
-                                            self.jsonFile)
+                                            self.jsonFile, self.visitorFilePath)
         except Exception as error:
             traceback.print_exc()
             strErrorMessage = "ISPyB storeHPLC error: %s" % error

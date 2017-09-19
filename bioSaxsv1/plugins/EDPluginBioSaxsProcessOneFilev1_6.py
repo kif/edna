@@ -244,8 +244,8 @@ class EDPluginBioSaxsProcessOneFilev1_6(EDPluginControl):
         self.setDataOutput(self.xsDataResult)
 
     def integrate(self):
-        #with fabio.fabioutils.File(self.rawImage) as raw:
-            img = fabio.open(self.rawImage)
+        with fabio.open(self.rawImage) as img:
+            #img = fabio.open(self.rawImage)
             number_of_bins = self.number_of_bins or max(img.dim1, img.dim2)
             if "Date" in img.header:
                 self.experimentSetup.timeOfFrame = XSDataTime(time.mktime(time.strptime(img.header["Date"], "%a %b %d %H:%M:%S %Y")))
