@@ -167,7 +167,7 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
                         self.client.service.storeHPLC(
                                             experimentId,
                                             self.hdf5File,
-                                            self.jsonFile, self.visitorFilePath)
+                                            self.jsonFile) # Add this to transfer file path: , self.visitorFilePath)
         except Exception as error:
             traceback.print_exc()
             strErrorMessage = "ISPyB storeHPLC error: %s" % error
