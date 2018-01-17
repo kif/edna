@@ -188,10 +188,15 @@ class EDPluginBioSaxsToSASv1_1(EDPluginControl):
         ########################################################################
 
         if self.dataInput.destinationDirectory is None:
-            outdir = os.path.join(os.path.dirname(os.path.dirname(self.strInFile)), "ednaSAS")
+            if self.strInFile is not None:
+                outdir = os.path.join(os.path.dirname(os.path.dirname(self.strInFile)), "ednaSAS")
+            else:
+                #nothing specified
+                outdir = os.path.join(os.path.dirname(os.getcwd()), "ednaSAS")
         else:
             outdir = self.dataInput.destinationDirectory.path.value
-        outdir = os.path.join(outdir, os.path.basename(os.path.splitext(self.strInFile)[0]))
+        if self.strInFile is not None:
+            outdir = os.path.join(outdir, os.path.basename(os.path.splitext(self.strInFile)[0]))
         if not os.path.isdir(outdir):
             os.makedirs(outdir)
         self.outFile = os.path.join(outdir, "NoResults.html")
