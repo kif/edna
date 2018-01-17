@@ -34,7 +34,7 @@ import os, shutil, traceback
 from EDPluginControl        import EDPluginControl
 from EDFactoryPlugin        import edFactoryPlugin
 from suds.client            import Client
-from suds.transport.http    import HttpAuthenticated
+from suds.transport.https   import HttpAuthenticated
 edFactoryPlugin.loadModule("XSDataBioSaxsv1_0")
 from XSDataBioSaxsv1_0      import XSDataResultBioSaxsISPyB_HPLCv1_0, XSDataInteger
 from XSDataBioSaxsv1_0      import XSDataInputBioSaxsISPyB_HPLCv1_0
@@ -116,7 +116,13 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
 
 
         # I don't trust in this authentication.... but it is going to work soon
-
+        if "http:" in  self.URL:
+            #print "OLD URL"
+            #self.URL.replace("http:", "https:",1)
+       
+            #self.URL.replace("8080","",1)
+            self.URL = "https://ispyb.esrf.fr/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl"
+            
         self.httpAuthenticatedToolsForBiosaxsWebService = HttpAuthenticated(username=user, password=password)
         self.client = Client(self.URL, transport=self.httpAuthenticatedToolsForBiosaxsWebService, cache=None)
         

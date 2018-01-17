@@ -15,7 +15,7 @@
         "DummyPixelValue": -1
     },
 	"EDPluginBioSaxsISPyBv1_0":{
-         "url":"http://ispyb.esrf.fr:8080/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl"
+         "url":"https://ispyb.esrf.fr/ispyb-ejb3/ispybWS/ToolsForBiosaxsWebService?wsdl"
 	},
 	"EDPluginBioSaxsProcessOneFilev1_3":{
 		"DummyPixelValue": -2.0,
