@@ -143,7 +143,10 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
             return
 
         if "http:" in  self.URL:
-            self.URL = "https://ispyb.esrf.fr/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl"
+            #print "OLD URL"
+            self.URL = self.URL.replace("http:", "https:",1)
+       
+            self.URL = self.URL.replace("8080","",1)
         self.httpAuthenticatedToolsForBiosaxsWebService = HttpAuthenticated(username=user, password=password)
         self.client = Client(self.URL, transport=self.httpAuthenticatedToolsForBiosaxsWebService, cache=None)
 
@@ -342,6 +345,7 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
     def copy_to_pyarch(self):
         if self.dataInput.sample.ispybDestination:
             pyarch = self.getPyarchFolder()
+            pyarch = self.updatePyArch(pyarch)
             try:
                 if not os.path.isdir(pyarch):
                     os.makedirs(pyarch)
@@ -383,3 +387,10 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
                 self.lstError.append(ermsg)
                 self.WARNING(ermsg)
 	return None
+    
+    def updatePyArch(self,originalPyArch):
+        now = datetime.datetime.now()
+        yearString = str(now.year)
+        archDatePattern = re.compile(r'/pyarch/20[0-9][0-9]')
+        newPyArch = archDatePattern.sub("/pyarch/" + yearString,originalPyArch)
+        return newPyArch

@@ -145,7 +145,10 @@ class EDPluginBioSaxsISPyBModellingv1_0(EDPluginControl):
             return
 #         self.modellingResult = self.dataInput.saxsModelingResult
         if "http:" in  self.URL:
-            self.URL = "https://ispyb.esrf.fr/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl"
+            #print "OLD URL"
+            self.URL = self.URL.replace("http:", "https:",1)
+       
+            self.URL = self.URL.replace("8080","",1)
         # I don't trust in this authentication.... but it is going to work soon
         self.httpAuthenticatedToolsForBiosaxsWebService = HttpAuthenticated(username=user, password=password)
         self.client = Client(self.dataBioSaxsSample.ispybURL.value, transport=self.httpAuthenticatedToolsForBiosaxsWebService, cache=None)
@@ -222,6 +225,7 @@ class EDPluginBioSaxsISPyBModellingv1_0(EDPluginControl):
     def copy_to_pyarch(self):
         if self.dataInput.sample.ispybDestination:
             pyarch = os.path.join(self.dataInput.sample.ispybDestination.path.value, str(self.dataInput.sample.measurementID.value))
+            pyarch = self.updatePyArch(pyarch)
             try:
                 if not os.path.isdir(pyarch):
                     os.makedirs(pyarch)
@@ -268,3 +272,10 @@ class EDPluginBioSaxsISPyBModellingv1_0(EDPluginControl):
                 self.lstError.append(ermsg)
                 self.WARNING(ermsg)
         return fullname
+    
+    def updatePyArch(self,originalPyArch):
+        now = datetime.datetime.now()
+        yearString = str(now.year)
+        archDatePattern = re.compile(r'/pyarch/20[0-9][0-9]')
+        newPyArch = archDatePattern.sub("/pyarch/" + yearString,originalPyArch)
+        return newPyArch

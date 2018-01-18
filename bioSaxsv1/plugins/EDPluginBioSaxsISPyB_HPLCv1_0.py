@@ -30,7 +30,7 @@ __copyright__ = "2012 ESRF"
 __status__ = "Development"
 __date__ = "20131003"
 
-import os, shutil, traceback
+import os, shutil, traceback, datetime, re
 from EDPluginControl        import EDPluginControl
 from EDFactoryPlugin        import edFactoryPlugin
 from suds.client            import Client
@@ -39,6 +39,7 @@ edFactoryPlugin.loadModule("XSDataBioSaxsv1_0")
 from XSDataBioSaxsv1_0      import XSDataResultBioSaxsISPyB_HPLCv1_0, XSDataInteger
 from XSDataBioSaxsv1_0      import XSDataInputBioSaxsISPyB_HPLCv1_0
 from XSDataCommon           import  XSDataString, XSDataStatus
+
 
 
 class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
@@ -118,11 +119,10 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
         # I don't trust in this authentication.... but it is going to work soon
         if "http:" in  self.URL:
             #print "OLD URL"
-            #self.URL.replace("http:", "https:",1)
+            self.URL = self.URL.replace("http:", "https:",1)
        
-            #self.URL.replace("8080","",1)
-            self.URL = "https://ispyb.esrf.fr/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl"
-            
+            self.URL = self.URL.replace("8080","",1)
+            #self.URL = "https://ispyb.esrf.fr/ispyb/ispyb-ws/ispybWS/ToolsForBiosaxsWebService?wsdl"
         self.httpAuthenticatedToolsForBiosaxsWebService = HttpAuthenticated(username=user, password=password)
         self.client = Client(self.URL, transport=self.httpAuthenticatedToolsForBiosaxsWebService, cache=None)
         
@@ -194,6 +194,7 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
             pyarch = os.path.join(self.dataInput.sample.ispybDestination.path.value)
             if (experimentId is not None):
                 pyarch = os.path.join(self.dataInput.sample.ispybDestination.path.value, experimentId)
+            pyarch = self.updatePyArch(pyarch)
             try:
                 if not os.path.isdir(pyarch):
                     os.makedirs(pyarch)
@@ -217,3 +218,10 @@ class EDPluginBioSaxsISPyB_HPLCv1_0(EDPluginControl):
                 self.WARNING(ermsg)
             else:
                 return os.path.join(pyarch, os.path.basename(afile))  # os.path.join(pyarch, afile)
+
+    def updatePyArch(self,originalPyArch):
+        now = datetime.datetime.now()
+        yearString = str(now.year)
+        archDatePattern = re.compile(r'/pyarch/20[0-9][0-9]')
+        newPyArch = archDatePattern.sub("/pyarch/" + yearString,originalPyArch)
+        return newPyArch
