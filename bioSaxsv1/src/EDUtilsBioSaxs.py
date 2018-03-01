@@ -39,6 +39,7 @@ import sys
 import os
 import time
 import traceback
+
 from EDUtilsPlatform import EDUtilsPlatform
 from EDThreading import Semaphore
 from EDUtilsPath import EDUtilsPath
@@ -47,7 +48,7 @@ specClientPath = os.path.join(EDUtilsPath.EDNA_HOME, "libraries", "SpecClient", 
 if os.path.isdir(specClientPath) and (specClientPath not in sys.path):
     sys.path.insert(1, specClientPath)
 
-
+from EDPlugin import EDPlugin
 from EDVerbose import EDVerbose
 from EDObject import EDObject
 try:
@@ -55,6 +56,7 @@ try:
 except:
     SpecVariable = None
 
+from nexus import Nexus
 import h5py
 import numpy
 import matplotlib
@@ -70,6 +72,20 @@ from math import floor as mfloor
 class Error(Exception):
     """Base class for exceptions in this module."""
     pass
+
+
+def get_list_of_plugins(edp=None):
+    """Retrieve all plugins loaded in the memory of the interpreter recursively
+    
+    :return: list of strings
+    """
+    if edp is None:
+        edp = EDPlugin
+    res = []
+    for cls in edp.__subclasses__():
+        res.append(cls.__name__)
+        res += get_list_of_plugins(cls)
+    return res
 
 
 class EDUtilsBioSaxs(EDObject):
@@ -344,7 +360,6 @@ class HPLCrun(object):
         self.for_buffer_sum_I = None
         self.for_buffer_sum_sigma2 = None
         self.hdf5_filename = None
-        self.hdf5 = None
         self.chunk_size = 250
         self.lock = Semaphore()
         if first_curve:
@@ -515,17 +530,38 @@ class HPLCrun(object):
         else:
             self.time -= self.time.min()
 
-    def save_hdf5(self):
+    def save_hdf5(self, name=None, all_plugins=None):
         if not self.max_size:
             self.extract_data()
+        max_frames = max(self.frames.keys()) + 1
         with self.lock:
             if os.path.exists(self.hdf5_filename):
                 os.unlink(self.hdf5_filename)
-            self.hdf5 = h5py.File(self.hdf5_filename)
-            self.hdf5.create_dataset("q", shape=(self.size,), dtype=numpy.float32, data=self.q)
-            for key in ["time"] + self.keys1d + self.keys2d:
-                self.hdf5[key] = numpy.asarray(self.__getattribute__(key), dtype=numpy.float32)
-            self.hdf5.close()
+            nexus = Nexus(self.hdf5_filename)
+            entry = nexus.new_entry(entry="entry", program_name=u"EDNA",
+                                    title=u"HPLC-SAXS experiment")
+            inst = nexus.new_instrument(entry=entry, instrument_name="BM29")
+            inst["name"] = u"ESRF BM29 BioSaxs"
+            nxprocess = nexus.new_class(entry, "EDNA", class_type="NXprocess")
+            nxprocess["program"] = u"EDNA"
+            if name:
+                nxprocess["version"] = unicode(name)
+            if all_plugins is None:
+                all_plugins = get_list_of_plugins()
+            all_plugins.sort()
+            nxprocess["plugins"] = u" ".join(all_plugins)
+            nxdata = nexus.new_class(entry, "HPLC", class_type="NXdata")
+            nxdata.attrs["signal"] = "sum_I"
+            nxdata.attrs["axes"] = ["time", ]
+            nxdata.attrs["interpretation"] = "spectrum"
+            nxdata.create_dataset("q", shape=(self.size,), dtype=numpy.float32, data=self.q)
+            nexus.h5["q"] = nxdata["q"]
+            nxdata.create_dataset("time", shape=(max_frames,), dtype=numpy.float32, data=self.time)
+            nexus.h5["time"] = nxdata["time"]
+            for key in self.keys1d + self.keys2d:
+                nexus[key] = numpy.asarray(self.__getattribute__(key), dtype=numpy.float32)[:max_frames]
+                nexus.h5[key] = nexus[key]
+            nexus.close()
         return self.hdf5_filename
 
     def make_plot(self):
@@ -773,13 +809,11 @@ class HPLCrun(object):
         self.extract_merges()
         with self.lock:
             try:
-#                 if os.path.exists(self.hdf5_filename):
-#                     os.unlink(self.hdf5_filename)
-                self.hdf5 = h5py.File(self.hdf5_filename)
+                hdf5 = h5py.File(self.hdf5_filename)
                 for key in self.keys_frames + self.keys_merges:
                     if self.__getattribute__(key) is not None:
-                        self.hdf5[key] = numpy.asarray(self.__getattribute__(key), dtype=numpy.float32)
-                self.hdf5.close()
+                        hdf5[key] = numpy.asarray(self.__getattribute__(key), dtype=numpy.float32)
+                hdf5.close()
             except:
                 print traceback.format_exc()
 

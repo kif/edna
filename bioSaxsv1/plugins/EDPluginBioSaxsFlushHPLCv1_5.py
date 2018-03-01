@@ -25,7 +25,7 @@ from __future__ import with_statement
 __author__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __copyright__ = "2012 ESRF"
-__date__ = "02/09/2015"
+__date__ = "01/03/2018"
 __status__ = "development"
 
 
@@ -39,7 +39,7 @@ edFactoryPlugin.loadModule("XSDataEdnaSaxs")
 
 from XSDataBioSaxsv1_0 import XSDataInputBioSaxsHPLCv1_0, XSDataResultBioSaxsHPLCv1_0, \
                             XSDataInputBioSaxsISPyB_HPLCv1_0, XSDataInputBioSaxsToSASv1_0, \
-                            XSDataInputBioSaxsISPyBv1_0, XSDataInputBioSaxsISPyBHPLCv1_0 
+                            XSDataInputBioSaxsISPyBv1_0, XSDataInputBioSaxsISPyBHPLCv1_0
 from XSDataEdnaSaxs import XSDataInputDataver, XSDataInputSaxsAnalysis
 
 from XSDataCommon import XSDataString, XSDataStatus, XSDataFile
@@ -66,8 +66,6 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
     __strControlledPluginSaxsModeling = "EDPluginBioSaxsToSASv1_1"
     __strControlledPluginISPyBAnalysis = "EDPluginHPLCPrimayDataISPyBv1_0"
 
-
-
     def __init__(self):
         """
         """
@@ -81,7 +79,7 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
         self.subtracted = None
         self.lstExecutiveSummary = []
         self.modeling = True
-    
+
     def checkParameters(self):
         """
         Checks the mandatory parameters.
@@ -133,13 +131,13 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
         self.xsDataResult.status = XSDataStatus(executiveSummary=XSDataString(executiveSummary))
         self.dataOutput = self.xsDataResult
 
-
     def processRun(self, run):
-        #EDPluginBioSaxsHPLCv1_5.dictHPLC[self.runId].reset()
+        # EDPluginBioSaxsHPLCv1_5.dictHPLC[self.runId].reset()
         for idx in run.frames:
             run.frames[idx].purge_memory()
         run.dump_json()
-        hdf5 = run.save_hdf5()
+
+        hdf5 = run.save_hdf5(name=self.__class__.__name__)
         self.json = os.path.splitext(hdf5)[0] + ".json"
         self.xsDataResult.hplcFile = XSDataFile(XSDataString(hdf5))
         self.xsDataResult.hplcImage = XSDataFile(XSDataString(run.make_plot()))
@@ -213,12 +211,12 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
                 except Exception as error:
                     traceback.print_stack()
                     self.ERROR("EDPluginBioSaxsFlushHPLCv1_5 calling to EDPluginHPLCPrimayDataISPyBv1_0: %s" % error)
-    
+
         self.synchronizePlugins()
         # There were some recurring issues with dammin slowing down slavia, therefore I commented this out for the time being
         # Martha, 11.7.2014
         mergeNumber = 1
-        #print run.merge_curves
+        # print run.merge_curves
         if self.modeling == True:
             for merge in run.merge_curves:
                 if run.merge_analysis[merge] is not None and 15.0 >= run.merge_analysis[merge].autoRg.rg.value >= 1.0:
@@ -227,10 +225,10 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
                         xsdGnomFile = XSDataFile(XSDataString(run.merge_analysis[merge].gnom.gnomFile.path.value))
                         destination = XSDataFile(XSDataString(os.path.join(os.path.dirname(os.path.dirname(merge)), "ednaSAS")))
                         self.__edPluginSaxsToSAS = self.loadPlugin(self.__strControlledPluginSaxsModeling)
-                        #print "Changing measurentID by runMerge"
-                        #In order to keep dammin models in different folder a measurementId should be given
+                        # print "Changing measurentID by runMerge"
+                        # In order to keep dammin models in different folder a measurementId should be given
                         self.__edPluginISPyBAnalysis.xsDataResult.dataInputBioSaxs.sample.measurementID.value = mergeNumber
-                        #print "------------>  MeasurementId changed " + str(self.__edPluginISPyBAnalysis.xsDataResult.dataInputBioSaxs.sample.measurementID.value)
+                        # print "------------>  MeasurementId changed " + str(self.__edPluginISPyBAnalysis.xsDataResult.dataInputBioSaxs.sample.measurementID.value)
                         self.__edPluginSaxsToSAS.dataInput = XSDataInputBioSaxsToSASv1_0(
                                                                                              sample=self.__edPluginISPyBAnalysis.xsDataResult.dataInputBioSaxs.sample,
                                                                                              subtractedCurve=xsdSubtractedCurve,
@@ -239,7 +237,7 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
                         self.__edPluginSaxsToSAS.connectSUCCESS(self.doSuccessSaxsToSAS)
                         self.__edPluginSaxsToSAS.connectFAILURE(self.doFailureSaxsToSAS)
                         mergeNumber = mergeNumber + 1;
-                        #self.__edPluginSaxsToSAS.executeSynchronous()
+                        # self.__edPluginSaxsToSAS.executeSynchronous()
                         self.__edPluginSaxsToSAS.execute()
                     except Exception as error:
                         traceback.print_stack()
@@ -289,11 +287,11 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
         self.ERROR(strErr)
         self.addExecutiveSummaryLine(strErr)
         self.setFailure()
-        
+
     def doSuccessSaxsToSAS(self, _edPlugin=None):
         self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doSuccessSaxsToSAS")
         self.retrieveSuccessMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doSuccessSaxsToSAS")
-        
+
     def doFailureSaxsToSAS(self, _edPlugin=None):
         self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doFailureSaxsToSAS")
         self.retrieveFailureMessages(_edPlugin, "EDPluginBioSaxsFlushHPLCv1_5.doFailureSaxsToSAS")
@@ -302,7 +300,7 @@ class EDPluginBioSaxsFlushHPLCv1_5 (EDPluginControl):
         self.ERROR(strErr)
         self.addExecutiveSummaryLine(strErr)
         self.setFailure()
-        
+
     def doSuccessISPyBAnalysis(self, _edPlugin=None):
         self.DEBUG("EDPluginBioSaxsFlushHPLCv1_5.doSuccessISPyBAnalysis")
         self.addExecutiveSummaryLine("Registered analysis in ISPyB")
