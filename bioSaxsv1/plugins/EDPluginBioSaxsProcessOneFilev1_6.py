@@ -27,7 +27,7 @@ from __future__ import with_statement
 __author__ = "Jérôme Kieffer"
 __license__ = "GPLv3+"
 __copyright__ = "ESRF"
-__date__ = "07/09/2017"
+__date__ = "05/04/2018"
 __status__ = "production"
 
 import os
@@ -82,7 +82,6 @@ class EDPluginBioSaxsProcessOneFilev1_6(EDPluginControl):
     dummy = -2
     delta_dummy = 1.1
     semaphore = Semaphore()
-    maskfile = None
     if pyFAI.opencl.ocl is None:
         METHOD = "fullsplit_csr"
     else:
@@ -245,7 +244,7 @@ class EDPluginBioSaxsProcessOneFilev1_6(EDPluginControl):
 
     def integrate(self):
         with fabio.open(self.rawImage) as img:
-            #img = fabio.open(self.rawImage)
+            # img = fabio.open(self.rawImage)
             number_of_bins = self.number_of_bins or max(img.dim1, img.dim2)
             if "Date" in img.header:
                 self.experimentSetup.timeOfFrame = XSDataTime(time.mktime(time.strptime(img.header["Date"], "%a %b %d %H:%M:%S %Y")))
@@ -261,12 +260,13 @@ class EDPluginBioSaxsProcessOneFilev1_6(EDPluginControl):
                     integrator = copy.copy(self.__class__.integrator)
                 else:
                     integrator = self.available_integrators.get()
-                if (str(new_integrator) != str(integrator) or
-                   self.maskfile != self.experimentSetup.maskFile.path.value):
+                if ((str(new_integrator) != str(integrator)) or
+                        (integrator.detector._maskfile != self.experimentSetup.maskFile.path.value)):
                     self.screen("Resetting PyFAI integrator")
                     new_integrator.detector.mask = self.calc_mask()
+                    new_integrator.detector._maskfile = self.experimentSetup.maskFile.path.value
                     integrator = self.__class__.integrator = new_integrator
-                 
+
             res_tuple = integrator.integrate1d(img.data, number_of_bins,
                                                correctSolidAngle=True,
                                                dummy=self.dummy, delta_dummy=self.delta_dummy,
@@ -285,12 +285,13 @@ class EDPluginBioSaxsProcessOneFilev1_6(EDPluginControl):
                                               res_tuple.sigma[valid_bins])
             return short_tuple
 
-    def calc_mask(self):
+    def calc_mask(self, maskfile=None):
         """
         Merge the natural mask from the detector with the user proided one.
         @return: numpy array with the mask
         """
-        maskfile = self.experimentSetup.maskFile.path.value
+        if maskfile is None:
+            maskfile = self.experimentSetup.maskFile.path.value
         mask = fabio.open(maskfile).data
 
         detector_mask = self.detector.calc_mask()
@@ -300,7 +301,6 @@ class EDPluginBioSaxsProcessOneFilev1_6(EDPluginControl):
         else:
             # crop the user defined mask
             mask = numpy.logical_or(mask[:shape0, :shape1], detector_mask)
-        self.__class__.maskfile = maskfile
         return mask
 
     def write3ColumnAscii(self, res, outputCurve="output.dat", hdr="#", linesep=os.linesep):
@@ -412,11 +412,11 @@ s-vector Intensity Error
             if res.sigma is None:
                 data = ["%14.6e %14.6e " % (q, I)
                         for q, I in zip(res.radial, res.intensity)]
-                        #3if abs(I - self.dummy) > self.delta_dummy]
+                        # 3if abs(I - self.dummy) > self.delta_dummy]
             else:
                 data = ["%14.6e %14.6e %14.6e" % (q, I, std)
                         for q, I, std in zip(res.radial, res.intensity, res.sigma)]
-                        #if abs(I - self.dummy) > self.delta_dummy]
+                        # if abs(I - self.dummy) > self.delta_dummy]
             data.append("")
             f.writelines(linesep.join(data))
             f.flush()
