@@ -93,7 +93,7 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
         self.lstDiscarded = []
         self.lstAveraged = []
         self.averageFilePath = None
-	self.visitorFilePath = None
+        self.visitorFilePath = None
 
         # For subtraction
         self.bufferFrames = []
@@ -155,18 +155,18 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
         if self.dataInput.bestBuffer is not None:
             self.bestBuffer = self.dataInput.bestBuffer.path.value
 
-	if self.dataInput.averageFilePath is not None:
-	    #Attention: averageFilePath is changed when copying data! visitorFilePath should stay constant
-	    self.averageFilePath = self.dataInput.averageFilePath.path.value
+        if self.dataInput.averageFilePath is not None:
+            #Attention: averageFilePath is changed when copying data! visitorFilePath should stay constant
+            self.averageFilePath = self.dataInput.averageFilePath.path.value
             self.visitorFilePath = self.dataInput.averageFilePath.path.value
 
-	if self.dataInput.sampleFrames is not None:
-	    self.sampleFrames = self.dataInput.sampleFrames
+        if self.dataInput.sampleFrames is not None:
+            self.sampleFrames = self.dataInput.sampleFrames
 
-	if self.dataInput.bufferFrames is not None:
-	    self.bufferFrames = self.dataInput.bufferFrames
-	if self.dataInput.subtractedFilePath is not None:
-	    self.subtractedFilePath = self.dataInput.subtractedFilePath.path.value
+        if self.dataInput.bufferFrames is not None:
+            self.bufferFrames = self.dataInput.bufferFrames
+        if self.dataInput.subtractedFilePath is not None:
+            self.subtractedFilePath = self.dataInput.subtractedFilePath.path.value
 
         # Params to be sent and I dont know them
         if self.dataInput.volume:
@@ -175,8 +175,8 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
             self.framesAverage = self.dataInput.frameAverage.value
         if self.dataInput.frameMerged:
             self.framesMerged = self.dataInput.frameMerged.value
-	if self.dataInput.averageSample:
-	    self.averageSample = self.dataInput.averageSample.path.value 
+        if self.dataInput.averageSample:
+            self.averageSample = self.dataInput.averageSample.path.value 
         if self.dataAutoRg:
             autoRg = self.dataAutoRg
             #if autoRg.filename and autoRg.filename.path:
@@ -237,65 +237,65 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
             collectionOrder = "-1"
 
         try:
-	    frames = []
-	    #for i in range(0, len(self.averagedFrames)):
-	    for filePath in self.lstAveraged: 
-		frames.append({'filePath' : str(filePath)})
+            frames = []
+            #for i in range(0, len(self.averagedFrames)):
+            for filePath in self.lstAveraged: 
+                frames.append({'filePath' : str(filePath)})
 
-	    discarded = []
-	    for filePath in self.lstDiscarded:              
-	        discarded.append({'filePath' : str(filePath)})
+            discarded = []
+            for filePath in self.lstDiscarded:              
+                discarded.append({'filePath' : str(filePath)})
 
             self.client.service.addAveraged(
                                     self.dataBioSaxsSample.measurementID.value,
-	    			    collectionOrder,
+                                        collectionOrder,
                                     str(frames),
                                     str(discarded),
                                     str(self.averageFilePath),
-				    str(self.visitorFilePath))
+                                    str(self.visitorFilePath))
         except Exception, error:
             strError = "ISPyB error: %s" % error
             self.ERROR(strError)
             
         # Adding subtraction into ISPyB
         try:
-	    
+            
             if int(collectionOrder) == 2:
-		sampleAvgOneDimensionalFiles = [] 
-		bufferAvgOneDimensionalFiles = [] 
+                sampleAvgOneDimensionalFiles = [] 
+                bufferAvgOneDimensionalFiles = [] 
 
-		for sampleFrameXSFile in self.sampleFrames:
-			sampleAvgOneDimensionalFiles.append({'filePath': str(self.copyfile(sampleFrameXSFile.path.value, self.getPyarchFolder()))})
+                for sampleFrameXSFile in self.sampleFrames:
+                        sampleAvgOneDimensionalFiles.append({'filePath': str(self.copyfile(sampleFrameXSFile.path.value, self.getPyarchFolder()))})
 
-		for bufferFrameXSFile in self.bufferFrames:
-			bufferAvgOneDimensionalFiles.append({'filePath': str(self.copyfile(bufferFrameXSFile.path.value, self.getPyarchFolder()))})
+                for bufferFrameXSFile in self.bufferFrames:
+                        bufferAvgOneDimensionalFiles.append({'filePath': str(self.copyfile(bufferFrameXSFile.path.value, self.getPyarchFolder()))})
 
-		self.subtractedFilePath = self.copyfile(self.subtractedFilePath, self.getPyarchFolder())
+                self.subtractedFilePath = self.copyfile(self.subtractedFilePath, self.getPyarchFolder())
 
-		self.client.service.addSubtraction(
-						self.dataBioSaxsSample.measurementID.value,
+                self.client.service.addSubtraction(
+                                                self.dataBioSaxsSample.measurementID.value,
                                                 self.rg,
                                                 self.rgStdev,
-                			        self.i0,
-		                                self.i0Stdev,
-                		                self.firstPointUsed,
-                		                self.lastPointUsed,
-                		                self.quality,
-                		                self.isagregated,
+                                                self.i0,
+                                                self.i0Stdev,
+                                                self.firstPointUsed,
+                                                self.lastPointUsed,
+                                                self.quality,
+                                                self.isagregated,
                                                 self.rgGnom,
                                                 self.dmax,
-                                		self.total,
-                		                self.volume,
+                                                self.total,
+                                                self.volume,
                                                 str(sampleAvgOneDimensionalFiles),
                                                 str(bufferAvgOneDimensionalFiles),
-                                                self.averageSample, 			#sampleAverageFilePath,
-                                                self.bestBuffer,			#bufferAverageFilePath,
-                                                self.subtractedFilePath, 		#subtractedFilePath,
-                                                self.scatterPlot,  			#experimentalDataPlotFilePath,
-                                                self.densityPlot, 			#densityPlotFilePath,
-                                                self.guinierPlot, 			#guinierPlotFilePath,
-                                                self.kratkyPlot,  			#kratkyPlotFilePath,
-                                                self.gnomFile) 				#gnomOutputFilePath
+                                                self.averageSample,                         #sampleAverageFilePath,
+                                                self.bestBuffer,                        #bufferAverageFilePath,
+                                                self.subtractedFilePath,                 #subtractedFilePath,
+                                                self.scatterPlot,                          #experimentalDataPlotFilePath,
+                                                self.densityPlot,                         #densityPlotFilePath,
+                                                self.guinierPlot,                         #guinierPlotFilePath,
+                                                self.kratkyPlot,                          #kratkyPlotFilePath,
+                                                self.gnomFile)                                 #gnomOutputFilePath
                 #self.client.service.storeDataAnalysisResultByMeasurementId(
                 #                    self.dataBioSaxsSample.measurementID.value,
                 #                    self.filename,
@@ -340,7 +340,7 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
         self.setDataOutput(xsDataResult)
     
     def getPyarchFolder(self):
-	return os.path.join(self.dataInput.sample.ispybDestination.path.value, "1d")
+        return os.path.join(self.dataInput.sample.ispybDestination.path.value, "1d")
  
     def copy_to_pyarch(self):
         if self.dataInput.sample.ispybDestination:
@@ -359,21 +359,21 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
                     self.lstDiscarded.append(self.copyfile(xsdfile.path.value, pyarch))
 
             for xsdfile in (self.dataInput.averagedFrames):
-	        if xsdfile:
-	            self.lstAveraged.append(self.copyfile(xsdfile.path.value, pyarch))
+                if xsdfile:
+                    self.lstAveraged.append(self.copyfile(xsdfile.path.value, pyarch))
 
-	    # Used only for the average
-	    self.averageFilePath = self.copyfile(self.averageFilePath,pyarch)
+            # Used only for the average
+            self.averageFilePath = self.copyfile(self.averageFilePath,pyarch)
 
-            # Used for the subtraction	    
+            # Used for the subtraction            
             self.bestBuffer = self.copyfile(self.bestBuffer, pyarch)
             self.gnomFile = self.copyfile(self.gnomFile, pyarch)
             self.scatterPlot = self.copyfile(self.scatterPlot, pyarch)
             self.guinierPlot = self.copyfile(self.guinierPlot, pyarch)
             self.kratkyPlot = self.copyfile(self.kratkyPlot, pyarch)
             self.densityPlot = self.copyfile(self.densityPlot, pyarch)
-	    self.averageSample = self.copyfile(self.averageSample, pyarch)
-	
+            self.averageSample = self.copyfile(self.averageSample, pyarch)
+        
 
     def copyfile(self, afile, pyarch):
         if not pyarch:
@@ -381,12 +381,12 @@ class EDPluginBioSaxsISPyBv1_0(EDPluginControl):
         if afile and os.path.exists(afile) and os.path.isdir(pyarch):
             try:
                 shutil.copy(afile, pyarch)
-		return os.path.join(pyarch, os.path.basename(afile))
+                return os.path.join(pyarch, os.path.basename(afile))
             except IOError as error:
                 ermsg = "BioSAXSISPyBv1_0: Error while copying %s to pyarch %s: %s " % (afile, pyarch, error)
                 self.lstError.append(ermsg)
                 self.WARNING(ermsg)
-	return None
+        return None
     
     def updatePyArch(self,originalPyArch):
         now = datetime.datetime.now()
